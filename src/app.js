@@ -4,8 +4,13 @@ import User from "./models/User.js";
 import { signupValidator } from './middlewares/validators/userValidator.js';
 import { validate } from './middlewares/validators/validate.js';
 import bcrypt from 'bcrypt';
+import { cookie } from 'express-validator';
+import cookieParser from 'cookie-parser';
+import jwt from 'jsonwebtoken';
+import authMiddleware from './middlewares/auth.js';
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/user", async (req, res) => {
     try{
@@ -99,20 +104,35 @@ app.post("/login", async (req,res) => {
         const user = await User.findOne({email :email });
         console.log("User found :->", user); // Log the user found
         
-        if(user.length === 0) {
+        if(!user) {
             return res.status(404).json({message : "Invalid credentials"});
         }
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await user.validatePassword(password);
         if(!isPasswordValid) {
             return res.status(401).json({message : "Invalid credentials"});
         }
-        res.status(200).json({
-            message: "Login successful!",
-            user: user
+        console.log("Password matched for user :->", user.email); // Log the successful password match
+        const token = await user.getJWT();
+        console.log("JWT Token generated :->", token); // Log the generated JWT token
+        console.log("jwt secret :->", process.env.JWT_SECRET); // Log the JWT secret
+        
+        res.cookie("token", token, {
+            httpOnly: true,
         });
+        res.send("Login successful!");
     } catch (err) {
         console.error("Error in login :->", err);
         res.status(500).json({ message: "Error logging in" });
+    }
+});
+
+app.get("/profile", authMiddleware, async (req, res) => {
+    try{
+        const user = req.user; // User is attached to the request object by authMiddleware
+        res.send(user);
+    }catch(err){
+        console.log("Error in fetching profile :->", err);
+        res.status(500).json({ message: "Error fetching profile" });
     }
 });
 
