@@ -86,5 +86,16 @@ userSchema.methods.validatePassword = async function(passwordGivenByUser) {
     const isValidated = await bcrypt.compare(passwordGivenByUser, user.password);
     return isValidated;
 }
+
+userSchema.methods.validateNewPassword = async function(newPassword) {
+    const user = this;
+    // Check if the new password is strong enough
+    const isStrong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(newPassword);
+    if (!isStrong) {
+        throw new Error('New password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character');
+    }
+    
+    return isStrong;
+}
 export const User = mongoose.model('User', userSchema);
 export default User;
