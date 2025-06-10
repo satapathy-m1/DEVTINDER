@@ -12,11 +12,13 @@ patch /profile/password
 
 ## ->connectionRouters
 /*  status:- interested, ignored, accepted, rejected */
+### -post /request/send/:status/:userId
 -post /request/send/interested/:userId
 -post /request/send/ignored/:userId
 
--post /request/review/accepted/:userId
--post /request/review/rejected/:userId
+### -post /request/review/:status/:requestId
+-post /request/review/accepted/:requestId
+-post /request/review/rejected/:requestId
 
 
 ## ->myFeedRouters

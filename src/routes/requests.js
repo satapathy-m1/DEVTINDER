@@ -48,4 +48,38 @@ requestsRouter.post("/request/send/:status/:toUserId", authMiddleware, async (re
     }
 });
 
+requestsRouter.post("/request/review/:status/:requestId", authMiddleware, async (req, res) => {
+    const loggedInUser = req.user;
+    const { requestId, status } = req.params;
+    const allowedStatuses = ["rejected", "accepted"];
+    if(!allowedStatuses.includes(status)) {
+        res.status(400).json({message : "Invalid status. Allowed statuses are 'rejected' or 'accepted'"});
+        return;
+    }
+    try{
+        const request = await ConnectionRequestModel.findOne({
+            _id : requestId,
+            toUserId : loggedInUser._id,
+            status : "interested"
+        })
+        if(!request) {
+            return res.status(404).json({error : "Connection request not found or already reviewed"});
+        }
+        request.status = status;
+        await request.save();
+        const fromUser = await User.findById(request.fromUserId);
+        if(!fromUser) {
+            return res.status(404).json({ error: "User who sent the request not found" });
+        }
+        res.status(200).json({
+            message: `${loggedInUser.firstName} has ${status} the connection request from ${fromUser.firstName}`,
+            request: request
+        });
+
+    }catch(err) {
+        console.log("Error in reviewing connection request:", err);
+        return res.status(500).json({error : "Error in reviewing connection request"});
+    }
+});
+
 export default requestsRouter;

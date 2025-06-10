@@ -52,7 +52,10 @@ authRouter.post("/login", async (req,res) => {
         res.cookie("token", token, {
             httpOnly: true,
         });
-        res.send("Login successful!");
+        const userWithoutPassword = user.toObject();
+        delete userWithoutPassword.password;
+
+        res.json(userWithoutPassword);
     } catch (err) {
         console.error("Error in login :->", err);
         res.status(500).json({ message: "Error logging in" });

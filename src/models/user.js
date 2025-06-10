@@ -97,5 +97,6 @@ userSchema.methods.validateNewPassword = async function(newPassword) {
     
     return isStrong;
 }
+
 export const User = mongoose.model('User', userSchema);
 export default User;
