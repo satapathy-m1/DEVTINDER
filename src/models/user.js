@@ -64,7 +64,7 @@ const userSchema = new mongoose.Schema({
     },
     profilePicture : {
         type : String,
-        match: [/^https?:\/\/.+\.(jpg|jpeg|png|webp|gif|svg)$/, 'Must be a valid image URL'],
+        //match: [/^https?:\/\/.+\.(jpg|jpeg|png|webp|gif|svg)$/, 'Must be a valid image URL'],
         default : "https://www.w3schools.com/howto/img_avatar.png",
     },
     skills : {

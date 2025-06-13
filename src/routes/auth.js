@@ -42,6 +42,8 @@ authRouter.post("/login", async (req,res) => {
         }
         const isPasswordValid = await user.validatePassword(password);
         if(!isPasswordValid) {
+            
+            
             return res.status(401).json({message : "Invalid credentials"});
         }
         console.log("Password matched for user :->", user.email); // Log the successful password match
